@@ -24,6 +24,7 @@
 import RPi.GPIO as GPIO
 import MFRC522
 import signal
+import time
 
 continue_reading = True
 
@@ -66,52 +67,51 @@ while continue_reading:
         MIFAREReader.MFRC522_SelectTag(uid)
 
         # Authenticate
-        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 8, key, uid)
+        status = MIFAREReader.MFRC522_Auth(MIFAREReader.PICC_AUTHENT1A, 9, key, uid)
         print "\n"
 
         # Check if authenticated
         if status == MIFAREReader.MI_OK:
 
             # Variable for the data to write
-            data = []
-
+         ###################################################################################################################
+            data1 = str.encode(raw_input("First Name: "))     
+            data=[]
+            #The size of the data into the address block should be 16
+            if not(len(data1)==16):
+                lack=16-len(data1)
+                data1=data1+"#"*lack
             # Fill the data with 0xFF
             for x in range(0,16):
-                data.append(0xFF)
+                data.append(ord(data1[x]))
 
-            print "Sector 8 looked like this:"
-            # Read block 8
-            MIFAREReader.MFRC522_Read(8)
-            print "\n"
-
-            print "Sector 8 will now be filled with 0xFF:"
+            print "Writing name..."
             # Write the data
-            MIFAREReader.MFRC522_Write(8, data)
+            MIFAREReader.MFRC522_Write(9, data)
             print "\n"
-
-            print "It now looks like this:"
-            # Check to see if it was written
-            MIFAREReader.MFRC522_Read(8)
-            print "\n"
-
-            data = []
-            # Fill the data with 0x00
+            ###########################################################################################################
+            data1 = str.encode(raw_input("Second Name: "))     
+            data=[]
+            if not(len(data1)==16):
+                lack=16-len(data1)
+                data1=data1+"#"*lack
+            # Fill the data with 0xFF
             for x in range(0,16):
-                data.append(0x00)
+                data.append(ord(data1[x]))
 
-            print "Now we fill it with 0x00:"
-            MIFAREReader.MFRC522_Write(8, data)
+            print "Writing second name..."
+            # Write the data into a different address block i.e 10
+            MIFAREReader.MFRC522_Write(10, data)
             print "\n"
-
-            print "It is now empty:"
-            # Check to see if it was written
-            MIFAREReader.MFRC522_Read(8)
-            print "\n"
-
+            #########################################################################################################
+            #Can input as much data as can be supported
             # Stop
             MIFAREReader.MFRC522_StopCrypto1()
 
             # Make sure to stop reading for cards
             continue_reading = False
+            time.sleep(2)
+            print('\n')
         else:
             print "Authentication error"
+
