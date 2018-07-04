@@ -180,9 +180,7 @@ class MFRC522:
     self.Write_MFRC522(self.CommIEnReg, irqEn|0x80)
     self.ClearBitMask(self.CommIrqReg, 0x80)
     self.SetBitMask(self.FIFOLevelReg, 0x80)
-    
-    self.Write_MFRC522(self.CommandReg, self.PCD_IDLE);  
-    
+    self.Write_MFRC522(self.CommandReg, self.PCD_IDLE);
     while(i<len(sendData)):
       self.Write_MFRC522(self.FIFODataReg, sendData[i])
       i = i+1
@@ -200,7 +198,6 @@ class MFRC522:
         break
     
     self.ClearBitMask(self.BitFramingReg, 0x80)
-  
     if i != 0:
       if (self.Read_MFRC522(self.ErrorReg) & 0x1B)==0x00:
         status = self.MI_OK
@@ -226,6 +223,7 @@ class MFRC522:
             backData.append(self.Read_MFRC522(self.FIFODataReg))
             i = i + 1;
       else:
+        print "Hal"
         status = self.MI_ERR
 
     return (status,backData,backLen)
@@ -359,8 +357,13 @@ class MFRC522:
     if not(status == self.MI_OK):
       print "Error while reading!"
     i = 0
+    name=""
     if len(backData) == 16:
-      print "Sector "+str(blockAddr)+" "+str(backData)
+##      print "Sector "+str(blockAddr)+" "+str(backData)
+        for x in range(0,len(backData)):
+            if not(backData[x]==35):
+                name=name+chr(backData[x])
+    print(name)
   
   def MFRC522_Write(self, blockAddr, writeData):
     buff = []
@@ -373,7 +376,7 @@ class MFRC522:
     if not(status == self.MI_OK) or not(backLen == 4) or not((backData[0] & 0x0F) == 0x0A):
         status = self.MI_ERR
     
-    print "%s backdata &0x0F == 0x0A %s" % (backLen, backData[0]&0x0F)
+##    print "%s backdata &0x0F == 0x0A %s" % (backLen, backData[0]&0x0F)
     if status == self.MI_OK:
         i = 0
         buf = []
